@@ -2,7 +2,7 @@
 var landsat = ee.ImageCollection("LANDSAT/LC8_L1T_TOA")
     .filterDate('2015-05-01', '2016-09-30')
 // City bounds
-var cbg = ee.FeatureCollection("users/ssogletree/cities")
+var city = ee.FeatureCollection("users/ssogletree/cities")
 
 // calculate NDVI, mapping over image collection
 var ndvi = landsat.map(function(image) {
@@ -24,8 +24,8 @@ var elevation = ee.Image("USGS/SRTMGL1_003") // elevation data
 var wmask = val_NDVI.mask(elevation.neq(0))
 
 // Map over feature collection, get the mean NDVI
-var meancbgndvi = wmask.reduceRegions({
-  collection: cbg,
+var meancityndvi = wmask.reduceRegions({
+  collection: city,
   reducer: ee.Reducer.mean().setOutputs(['mean_ndvi']).combine({
 		reducer2: ee.Reducer.median().setOutputs(['median_ndvi']),
     sharedInputs: true
@@ -36,11 +36,13 @@ var meancbgndvi = wmask.reduceRegions({
 // Print the first to check, just the first 6 elements
 // print(meancityndvi.toList(6))
 
+// drop .geo
+var ndviOut = meancityndvi.select(['.*'], null, false);
 
 /* export to google drive */
  Export.table.toDrive({
-  collection: meancbgndvi, 
-  description: 'cbg15_mean_ndvi_20180101', 
+  collection: ndviOut, 
+  description: 'toa_city15_ndvi_mm_20180103', 
   folder: 'RemoteSensingWork', 
 //fileNamePrefix: , 
   fileFormat: 'CSV'
