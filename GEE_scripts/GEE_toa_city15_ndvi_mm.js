@@ -2,7 +2,8 @@
 var landsat = ee.ImageCollection("LANDSAT/LC8_L1T_TOA")
     .filterDate('2015-05-01', '2016-09-30')
 // City bounds
-var city = ee.FeatureCollection("users/ssogletree/cities")
+var fc = ee.FeatureCollection("users/ssogletree/cities")
+var city = fc.select(['city_st'])
 
 // calculate NDVI, mapping over image collection
 var ndvi = landsat.map(function(image) {
