@@ -1,0 +1,36 @@
+2018-04-01
+
+A table of results could look like this:
+	
+FIXED EFFECTS
+	Intercept 				The average test score across schools,reflected in the fixed effects intercept term
+	NDVI
+	MedHHinc
+	Population Density
+	Disadvantage
+	Diversity
+	
+	Climate Region
+	Metro GDP
+	Police
+	Rate - Total
+	Rate - Violent
+	Rate - Property
+
+RANDOM EFFECTS
+	Intercept				The variance component corresponding to the random intercept
+	NDVI
+	Residual
+	
+	MODEL FIT
+	AIC
+	BIC
+	Deviance
+	Log Likelihood
+	
+	
+	
+
+be used to partition the variance across levels. The intraclass correlation coe cient is
+equal to 8.614 = 18.04, meaning that roughly 18% of the variance is attributable 
+to the school-level.

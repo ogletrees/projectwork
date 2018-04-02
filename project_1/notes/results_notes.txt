@@ -1,0 +1,117 @@
+2018-04-01
+
+ICC values for variables of interest:
+	
+	> ICC1(tot_anov)CRMCYTOTC
+	[1] 0.3099787
+	> ICC1(viol_anov)CRMCYPERC
+	[1] 0.3456869
+	> ICC1(prop_anov)CRMCYPROC
+	[1] 0.3136039
+	> ICC1(ndvi_anov)ndvi_mean_cbg_adj
+	[1] 0.6860852
+	
+With variation at block groups and at cities, a multilevel modeling approach is called for. These ICC values state that there is variation accounted for by differences in city.
+
+	> ICC2(tot_anov)
+	[1] 0.9893232
+	> ICC2(viol_anov)
+	[1] 0.990907
+	> ICC2(prop_anov)
+	[1] 0.9895002
+	> ICC2(ndvi_anov)
+	[1] 0.9977867
+	
+Working through things with just total crime at first.
+
+Intercept only model:
+	Random effects:
+	 Groups   Name        Variance Std.Dev.
+	 city_st  (Intercept) 2836     53.25   
+	 Residual             6424     80.15   
+	Number of obs: 62086, groups:  city_st, 301
+	
+	Fixed effects:
+	            Estimate Std. Error t value
+	(Intercept)  136.188      3.103   43.88
+	
+Add NDVI as fixed effect:
+		Random effects:
+	 Groups   Name        Variance Std.Dev.
+	 city_st  (Intercept) 6544     80.90   
+	 Residual             5472     73.97   
+	Number of obs: 62086, groups:  city_st, 301
+	
+	Fixed effects:
+	                  Estimate Std. Error t value
+	(Intercept)       290.3459     4.9164   59.06
+	ndvi_mean_cbg_adj -35.8322     0.3483 -102.88
+	
+	Correlation of Fixed Effects:
+	            (Intr)
+	ndv_mn_cbg_ -0.305
+	
+Add NDVI as random slope too:
+		Random effects:
+	 Groups   Name              Variance Std.Dev. Corr 
+	 city_st  (Intercept)       31703.8  178.06        
+	          ndvi_mean_cbg_adj   631.2   25.12   -0.90
+	 Residual                    4962.2   70.44        
+	Number of obs: 62086, groups:  city_st, 301
+	
+	Fixed effects:
+	                  Estimate Std. Error t value
+	(Intercept)        344.447     10.587   32.53
+	ndvi_mean_cbg_adj  -45.482      1.568  -29.01
+	
+	Correlation of Fixed Effects:
+	            (Intr)
+	ndv_mn_cbg_ -0.899
+	
+> glance(mod_1a)
+     sigma    logLik      AIC      BIC deviance df.residual
+1 80.14797 -360881.3 721768.7 721795.8 721766.8       62083
+> glance(mod_2a)
+     sigma    logLik      AIC      BIC deviance df.residual
+1 73.96998 -356048.2 712104.4 712140.6 712101.1       62082
+> glance(mod_2b)
+     sigma    logLik      AIC      BIC deviance df.residual
+1 70.44302 -353358.4 706728.9 706783.1 706724.5       62080
+
+
+Running all level 1 covariates, grand mean centered:
+	Linear mixed model fit by REML ['lmerMod']
+	Formula: 
+	CRMCYTOTC ~ grand_ndvi_adj + grand_MedHHinc000 + grand_U18 + grand_disad + grand_diver + grand_logpopden + (1 | city_st)
+	   Data: df3
+	
+	REML criterion at convergence: 665106.2
+	
+	Scaled residuals: 
+	    Min      1Q  Median      3Q     Max 
+	-5.1025 -0.6260 -0.0733  0.5436  9.6842 
+	
+	Random effects:
+	 Groups   Name        Variance Std.Dev.
+	 city_st  (Intercept) 4633     68.06   
+	 Residual             3975     63.05   
+	Number of obs: 59647, groups:  city_st, 301
+	
+	Fixed effects:
+	                   Estimate Std. Error t value
+	(Intercept)       139.46563    3.94244   35.38
+	grand_ndvi_adj    -37.11129    0.34083 -108.88
+	grand_MedHHinc000  -0.21063    0.01255  -16.78
+	grand_U18          -1.17638    0.03151  -37.33
+	grand_disad        37.64629    0.54195   69.46
+	grand_diver        17.94185    1.67282   10.72
+	grand_logpopden   -31.56934    0.36495  -86.50
+	
+	Correlation of Fixed Effects:
+	            (Intr) grnd__ g_MHH0 gr_U18 grnd_ds grnd_dv
+	grnd_ndv_dj -0.010                                     
+	grnd_MHH000  0.011 -0.091                              
+	grand_U18   -0.010 -0.185 -0.178                       
+	grand_disad  0.013  0.074  0.651 -0.398                
+	grand_diver -0.004  0.098  0.159 -0.093  0.005         
+	grnd_lgppdn  0.024  0.301  0.099 -0.084 -0.015  -0.042 

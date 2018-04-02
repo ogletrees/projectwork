@@ -1,0 +1,50 @@
+2018-04-02
+
+Modeling
+
+> summary.lm(mod_1a)
+
+Call:
+lm(formula = df3$CRMCYTOTC ~ df3$ndvi_mean_cbg)
+
+Residuals:
+         Min           1Q       Median           3Q          Max 
+-147.0719204  -71.9613785  -19.3577609   52.6199106 1088.2915316 
+
+Coefficients:
+                      Estimate   Std. Error   t value               Pr(>|t|)    
+(Intercept)       127.94116259   1.10509788 115.77360 < 0.000000000000000222 ***
+df3$ndvi_mean_cbg  36.35987045   2.54756878  14.27238 < 0.000000000000000222 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 96.2791666 on 62084 degrees of freedom
+Multiple R-squared:  0.00327032201,	Adjusted R-squared:  0.00325426748 
+F-statistic: 203.700839 on 1 and 62084 DF,  p-value: < 0.0000000000000002220446
+
+> summary.lm(mod_1b)
+
+Call:
+lm(formula = df3$CRMCYTOTC ~ df3$ndvi_mean_cbg + df3$MedHHinc_000 + 
+    df3$disad + df3$divindex + df3$log_popden_cbg + df3$PcU18_whole)
+
+Residuals:
+         Min           1Q       Median           3Q          Max 
+-301.0833257  -53.8471064  -13.3081001   39.8517339  789.5484921 
+
+Coefficients:
+                         Estimate     Std. Error   t value               Pr(>|t|)    
+(Intercept)        483.8178841302   3.5153316250 137.63079 < 0.000000000000000222 ***
+df3$ndvi_mean_cbg  -58.2546839541   2.5397425424 -22.93724 < 0.000000000000000222 ***
+df3$MedHHinc_000    -0.5522484763   0.0139896825 -39.47541 < 0.000000000000000222 ***
+df3$disad           43.4248826594   0.6284894862  69.09405 < 0.000000000000000222 ***
+df3$divindex         6.3139854766   1.8557793785   3.40234             0.00066856 ***
+df3$log_popden_cbg -31.5560299830   0.3383735793 -93.25796 < 0.000000000000000222 ***
+df3$PcU18_whole     -1.9167929449   0.0367160242 -52.20590 < 0.000000000000000222 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 78.9431485 on 59640 degrees of freedom
+  (2439 observations deleted due to missingness)
+Multiple R-squared:  0.305543854,	Adjusted R-squared:  0.305473989 
+F-statistic: 4373.35881 on 6 and 59640 DF,  p-value: < 0.0000000000000002220446
