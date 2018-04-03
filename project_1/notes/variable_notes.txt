@@ -1,0 +1,7 @@
+
+For the climate regions from 4 clusters based on temperature adn precipitation:
+
+1 - "warm_wet" 
+2 - "cool_wet" 
+3 - "warm_dry" 
+4 - "cool_dry"
