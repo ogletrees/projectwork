@@ -76,3 +76,7 @@ t1 <- t1 %>% left_join(t2) %>% left_join(t3)
 summary(t1)
 t1$momean3 <- round(t1$momean3, 7)
 # OK, I think that's all good now.
+#----------------------------------------------------------
+saveRDS(df4, "../data/full_mlm_datset.rds")
+
+summary(df4)
