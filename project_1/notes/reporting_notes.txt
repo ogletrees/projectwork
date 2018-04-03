@@ -1,0 +1,5 @@
+
+
+You can report that equation as stated, and add that the coefficient of dd varies from individual to individual with a standard deviation of .215. And also that the individuals' intercepts vary with an SD of .523, and that the SD of error not accounted for by individuals is 2.613. This information is in the summary table of random effects.
+
+from https://stats.stackexchange.com/questions/117380/how-to-report-a-linear-mixed-effects-model-equation?rq=1
