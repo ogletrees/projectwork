@@ -5,3 +5,4 @@ For the climate regions from 4 clusters based on temperature adn precipitation:
 2 - "cool_wet" 
 3 - "warm_dry" 
 4 - "cool_dry"
+!!!!! not sure where I got this from, but it may be wrond in the order!!!!!
