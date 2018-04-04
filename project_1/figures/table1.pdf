@@ -1,0 +1,239 @@
+<table style="border-collapse:collapse; border:none;">
+<td style="padding:0.2cm; border-top:double;">&nbsp;</td>
+<td style="border-bottom:1px solid; padding-left:0.5em; padding-right:0.5em; border-top:double;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; border-bottom:1px solid; border-top:double;">CRMCYTOTC</td>
+<td style="border-bottom:1px solid; padding-left:0.5em; padding-right:0.5em; border-top:double;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; border-bottom:1px solid; border-top:double;">CRMCYPERC</td>
+<td style="border-bottom:1px solid; padding-left:0.5em; padding-right:0.5em; border-top:double;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; border-bottom:1px solid; border-top:double;">CRMCYPROC</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; font-style:italic;">&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em; font-style:italic;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; font-style:italic; ">B (CI)</td>
+<td style="padding-left:0.5em; padding-right:0.5em; font-style:italic;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; font-style:italic; ">B (CI)</td>
+<td style="padding-left:0.5em; padding-right:0.5em; font-style:italic;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; font-style:italic; ">B (CI)</td> 
+</tr>
+<tr>
+<td colspan="7" style="padding:0.2cm; text-align:left; border-top:1px solid; font-weight:bold; text-align:left;">Fixed Parts</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">(Intercept)</td>
+<td style="padding-left:0.5em; padding-right:0.5em; ">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">96.49<br>(88.24&nbsp;&ndash;&nbsp;104.73)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em; ">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">146.54<br>(135.74&nbsp;&ndash;&nbsp;157.33)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em; ">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">89.42<br>(80.84&nbsp;&ndash;&nbsp;98.00)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_ndvi_cbg_adj</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;30.46<br>(&#45;32.14&nbsp;&ndash;&nbsp;&#45;28.78)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;20.85<br>(&#45;23.49&nbsp;&ndash;&nbsp;&#45;18.20)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;31.88<br>(&#45;33.53&nbsp;&ndash;&nbsp;&#45;30.22)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">clust4cool_wet</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">76.05<br>(66.23&nbsp;&ndash;&nbsp;85.86)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">64.46<br>(51.58&nbsp;&ndash;&nbsp;77.35)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">77.65<br>(67.43&nbsp;&ndash;&nbsp;87.87)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">clust4warm_dry</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">65.61<br>(55.70&nbsp;&ndash;&nbsp;75.52)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">38.69<br>(25.56&nbsp;&ndash;&nbsp;51.82)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">69.04<br>(58.73&nbsp;&ndash;&nbsp;79.35)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">clust4cool_dry</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">70.75<br>(60.69&nbsp;&ndash;&nbsp;80.80)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">55.83<br>(42.62&nbsp;&ndash;&nbsp;69.04)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">72.98<br>(62.52&nbsp;&ndash;&nbsp;83.45)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_MedHHinc000</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.21<br>(&#45;0.24&nbsp;&ndash;&nbsp;&#45;0.19)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.40<br>(&#45;0.43&nbsp;&ndash;&nbsp;&#45;0.36)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.19<br>(&#45;0.21&nbsp;&ndash;&nbsp;&#45;0.16)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_disad</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">37.37<br>(36.31&nbsp;&ndash;&nbsp;38.43)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">102.51<br>(100.82&nbsp;&ndash;&nbsp;104.19)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">28.35<br>(27.31&nbsp;&ndash;&nbsp;29.39)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_diver</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">17.52<br>(14.25&nbsp;&ndash;&nbsp;20.78)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;35.29<br>(&#45;40.47&nbsp;&ndash;&nbsp;&#45;30.11)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">24.82<br>(21.60&nbsp;&ndash;&nbsp;28.03)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_U18</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;1.15<br>(&#45;1.21&nbsp;&ndash;&nbsp;&#45;1.08)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.04<br>(&#45;0.14&nbsp;&ndash;&nbsp;0.06)&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;1.30<br>(&#45;1.36&nbsp;&ndash;&nbsp;&#45;1.24)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_logpopden</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;31.18<br>(&#45;31.89&nbsp;&ndash;&nbsp;&#45;30.46)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;30.48<br>(&#45;31.61&nbsp;&ndash;&nbsp;&#45;29.34)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;31.27<br>(&#45;31.98&nbsp;&ndash;&nbsp;&#45;30.57)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_MetroGDP</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.00<br>(&#45;0.00&nbsp;&ndash;&nbsp;&#45;0.00)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">0.00<br>(&#45;0.00&nbsp;&ndash;&nbsp;0.00)&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.00<br>(&#45;0.00&nbsp;&ndash;&nbsp;&#45;0.00)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_Police</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">0.13<br>(&#45;4.59&nbsp;&ndash;&nbsp;4.86)&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;0.95<br>(&#45;7.49&nbsp;&ndash;&nbsp;5.60)&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">0.67<br>(&#45;4.11&nbsp;&ndash;&nbsp;5.44)&nbsp;</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_rt_total</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">2.39<br>(2.16&nbsp;&ndash;&nbsp;2.62)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_ndvi_cbg_adj:clust4cool_wet</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;4.40<br>(&#45;6.23&nbsp;&ndash;&nbsp;&#45;2.57)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;7.77<br>(&#45;10.66&nbsp;&ndash;&nbsp;&#45;4.88)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;3.86<br>(&#45;5.67&nbsp;&ndash;&nbsp;&#45;2.06)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_ndvi_cbg_adj:clust4warm_dry</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;11.30<br>(&#45;13.51&nbsp;&ndash;&nbsp;&#45;9.10)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;7.32<br>(&#45;10.80&nbsp;&ndash;&nbsp;&#45;3.84)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;11.83<br>(&#45;14.01&nbsp;&ndash;&nbsp;&#45;9.66)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_ndvi_cbg_adj:clust4cool_dry</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;16.34<br>(&#45;18.66&nbsp;&ndash;&nbsp;&#45;14.02)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;11.00<br>(&#45;14.66&nbsp;&ndash;&nbsp;&#45;7.34)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&#45;17.11<br>(&#45;19.40&nbsp;&ndash;&nbsp;&#45;14.82)&nbsp;***</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_rt_violent</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">16.71<br>(15.28&nbsp;&ndash;&nbsp;18.14)&nbsp;***</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left;">gndctr_rt_property</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">&nbsp;</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td>
+<td style="padding:0.2cm; text-align:center; ">2.83<br>(2.55&nbsp;&ndash;&nbsp;3.11)&nbsp;***</td>
+</tr><tr>
+<td colspan="7" style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; font-weight:bold; text-align:left; padding-top:0.5em;">Random Parts</td>
+</tr>
+
+<tr>
+<td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;">&sigma;<sup>2</sup></td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">3956.406</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">10012.340</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">3841.675</td>
+</tr>
+
+<tr>
+<td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;">&tau;<sub>00, city_st</sub></td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">740.141</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">1211.197</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">811.680</td>
+</tr>
+
+<tr>
+<td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;">N<sub>city_st</sub></td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">301</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">301</td>
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">301</td>
+</tr>
+
+<tr>
+<td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;">Observations</td>
+<td style="padding-left:0.5em; padding-right:0.5em; border-top:1px solid;">&nbsp;</td><td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:center; border-top:1px solid;">59647</td>
+<td style="padding-left:0.5em; padding-right:0.5em; border-top:1px solid;">&nbsp;</td><td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:center; border-top:1px solid;">59647</td>
+<td style="padding-left:0.5em; padding-right:0.5em; border-top:1px solid;">&nbsp;</td><td style="padding:0.2cm; padding-top:0.1cm; padding-bottom:0.1cm; text-align:center; border-top:1px solid;">59647</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">R<sup>2</sup> / &Omega;<sub>0</sub><sup>2</sup></td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">.561 / .561</td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">.618 / .618</td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">.551 / .551</td>
+ </tr>
+ <tr>
+ <td style="padding:0.2cm; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">AIC</td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td> <td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">664324.380</td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td> <td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">719567.537</td>
+
+<td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td> <td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">662603.346</td>
+</tr>
+<tr>
+<td style="padding:0.2cm; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">Deviance</td><td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">664278.272</td><td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">719536.442</td><td style="padding-left:0.5em; padding-right:0.5em;">&nbsp;</td><td style="padding:0.2cm; text-align:center; padding-top:0.1cm; padding-bottom:0.1cm;">662557.869</td>
+</tr>
+<tr style="padding:0.2cm; border-top:1px solid;">
+<td style="padding:0.2cm;">Notes</td><td style="padding:0.2cm; text-align:right;" colspan="6"><em>* p&lt;.05&nbsp;&nbsp;&nbsp;** p&lt;.01&nbsp;&nbsp;&nbsp;*** p&lt;.001</em></td>
+</tr>
+</table>
+
