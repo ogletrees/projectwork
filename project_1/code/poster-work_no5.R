@@ -88,9 +88,29 @@ ggsave("../figures/interactplot_ndvi_climate_pc.pdf", width = 11)
 sjt.lmer(mod_5a, mod_5b, mod_5c, p.kr = F, separate.ci.col = F, show.icc = F, show.aic = T, p.numeric = F, show.dev = T, depvar.labels = c("Total Crime Index", "Violent Crime Index", "Property Crime Index") )
 
 # slopes varying ----------------------------------------------------------
+levels(d$clust4)
+levels(d$clust4) <- c("warm_dry", "cool_wet", "warm_wet", "cool_dry")
 
 mod_6a <- lme4::lmer(CRMCYTOTC ~ gndctr_ndvi_cbg_adj * clust4 + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
                        + gndctr_MetroGDP + gndctr_Police + gndctr_rt_total + (gndctr_ndvi_cbg_adj|city_st), data = d)
 summary(mod_6a)
 # this will get varying slopes for the estimate of NDVI on crime
-coef(mod_6a)$city_st
+rs_ndvi <- coef(mod_6a)$city_st
+
+
+# diagnostics -------------------------------------------------------------
+
+plot(fitted(mod_5a), residuals(mod_5a), main = "total crime")
+plot(fitted(mod_5b), residuals(mod_5b), main = "violent crime")
+plot(fitted(mod_5c), residuals(mod_5c), main = "property crime")
+
+qqnorm(residuals(mod_5c))
+plot(mod_5a)
+plot(fitted(mod_5a), mod_5a@frame$CRMCYTOTC)
+plot(density(sqrt(d$CRMCYTOTC)))
+base::summary(sqrt(d$CRMCYTOTC))
+
+mod_7a <- lme4::lmer(sqrt(CRMCYTOTC) ~ gndctr_ndvi_cbg_adj * clust4 + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
+                       + gndctr_MetroGDP + gndctr_Police + gndctr_rt_total + (1|city_st), data = d)
+plot(mod_7a)
+summary(mod_7a)
