@@ -26,7 +26,7 @@ df2$log_popden_cbg <- log(df2$popden_cbg + .1)
 # make the climate clusters a factor
 df2$clust4 <- as.factor(df2$clust4)
 levels(df2$clust4)
-levels(df2$clust4) <- c("warm_wet", "cool_wet", "warm_dry", "cool_dry")
+levels(df2$clust4) <- c("warm_dry", "cool_wet", "warm_wet", "cool_dry")
 
 str(df2)
 names(df2)
