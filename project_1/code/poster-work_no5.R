@@ -65,10 +65,10 @@ sjt.lmer(mod_2a, mod_3a, mod_4a, mod_5a, p.kr = F, show.aic = T, separate.ci.col
 summary(mod_2a)
 sjp.lmer(mod_5a,mod_5b, type = "fe", p.kr = F, show.intercept = T, y.offset = .3)
 
-alab <- c("Percent under 18 years", "City violent crime rate (per 1,000)", "City total crime rate (per 1,000)", "City property crime rate (per 1,000)", "Police per 1,000", "NDVI X warm & dry", "NDVI X cool & wet", "NDVI X cool & dry", "NDVI - greenspace", "Metro GDP", "Median household income (000's)", "Population density (log)", "Diveristy index", "Disadvantage index", "Climate Region - warm & dry", "Climate Region - cool & wet", "Climate Region - cool & dry")
+alab <- c("Percent under 18 years", "City violent crime rate (per 1,000)", "City total crime rate (per 1,000)", "City property crime rate (per 1,000)", "Police per 1,000", "NDVI X warm & wet", "NDVI X cool & wet", "NDVI X cool & dry", "NDVI - greenspace", "Metro GDP", "Median household income (000's)", "Population density (log)", "Diveristy index", "Disadvantage index", "Climate Region - warm & wet", "Climate Region - cool & wet", "Climate Region - cool & dry")
 
 plot_models(mod_5a, mod_5b, mod_5c, m.labels = c("Total Crime Index", "Violent Crime Index", "Property Crime Index"), title = "Fixed effects estimates", axis.labels = rev(alab))
-ggsave("../figures/coef_plot_mod5.pdf", width = 11)
+ggsave("../figures/coef_plot_mod5.pdf", width = 11, useDingbats = F)
 
 fixef(mod_5a)
 r_m5a <- ranef(mod_5a)$city_st
