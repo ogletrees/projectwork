@@ -1,0 +1,86 @@
+---
+title: "Initial Analysis - grand center NDVI"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+```
+Let's look at the variables of interest. These are crime index-total, crime index-violent, crime index-property, and green measures.
+```{r}
+skimr::skim(df$CRMCYTOTC)
+skimr::skim(df$CRMCYPERC)
+skimr::skim(df$CRMCYPROC)
+skimr::skim(df$gndctr_ndvi_cbg_adj)
+```
+First, is there variation in the variables that is attributable to the differences between cities, the level 2 'groups'.
+```{r}
+t <- df[, c("CRMCYTOTC", "CRMCYPERC", "CRMCYPROC", "gndctr_ndvi_cbg_adj")]
+mult.icc(as.data.frame(t), grpid= df$city_st)
+```
+
+Start with the intercept only models
+```{r}
+mod_1a <- lmer(CRMCYTOTC ~ 1 + (1|city_st), data = df)
+mod_1b <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df)
+mod_1c <- lmer(CRMCYPROC ~ 1 + (1|city_st), data = df)
+
+summary(mod_1a)
+summary(mod_1b)
+summary(mod_1c)
+```
+So maybe at this point let's just look at the ndvi relationship. First as just random intercepts.
+```{r}
+mod_2a <- lmer(CRMCYTOTC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+mod_2b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+mod_2c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+
+summary(mod_2a)
+summary(mod_2b)
+summary(mod_2c)
+```
+Do these fit better than the intercept only models?
+```{r}
+anova(mod_1a, mod_2a)
+anova(mod_1b, mod_2b)
+anova(mod_1c, mod_2c)
+```
+Next, how about adding random slopes for NDVI. Now the NDVI slope varies by city, so some cities will have a stronger or weaker relationship between NDVI and crime.
+```{r}
+mod_3a <- lmer(CRMCYTOTC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df)
+mod_3b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df)
+mod_3c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df)
+
+summary(mod_3a)
+summary(mod_3b)
+summary(mod_3c)
+```
+Do the models with varying slopes provide a better fit?
+```{r}
+anova(mod_2a, mod_3a)
+anova(mod_2b, mod_3b)
+anova(mod_2c, mod_3c)
+```
+With allowing varying intercepts and slopes for NDVI we get an estimate for each city, let's plot those from the 3rd models.
+```{r}
+estmod3b <- coef(mod_3b)$city_st
+ggplot(df, aes(gndctr_ndvi_cbg_adj, CRMCYPERC)) + geom_point(alpha = 0) + geom_abline(data = estmod3b, aes(slope = gndctr_ndvi_cbg_adj, intercept = `(Intercept)`), alpha = .2) + xlim(-10, 10) + ggtitle("Violent Crime") + geom_vline(aes(xintercept = mean(gndctr_ndvi_cbg_adj)), data = df)
+
+estmod3c <- coef(mod_3c)$city_st
+ggplot(df, aes(gndctr_ndvi_cbg_adj, CRMCYPROC)) + geom_point(alpha = 0) + geom_abline(data = estmod3c, aes(slope = gndctr_ndvi_cbg_adj, intercept = `(Intercept)`), alpha = .2) + xlim(-10, 10) + ggtitle("Property Crime") + geom_vline(aes(xintercept = mean(gndctr_ndvi_cbg_adj)), data = df)
+```
+With the NDVI measure grand mean centered we have 0 as the average across all block groups.(min of NDVI in cbg is `r min(df$gndctr_ndvi_cbg_adj)` and max of NDVI is `r  max(df$gndctr_ndvi_cbg_adj)`)
+```{r, out.height= "220%"}
+estmod3b %>% mutate(city_st = row.names(.)) %>% ggplot(aes(`(Intercept)`, gndctr_ndvi_cbg_adj)) + geom_point() + labs(x = "Intercept", y = "NDVI slope", title = "Violent Crime") 
+
+estmod3c %>% mutate(city_st = row.names(.)) %>% ggplot(aes(`(Intercept)`, gndctr_ndvi_cbg_adj)) + geom_point() + labs(x = "Intercept", y = "NDVI slope", title = "Property Crime") 
+```
+
