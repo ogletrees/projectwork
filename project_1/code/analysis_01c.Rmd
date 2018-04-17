@@ -1,0 +1,59 @@
+---
+title: "Initial Analysis - grand center NDVI + L1 covariates"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+```
+So far I have fit models with the raw NDVI and the grand centered NDVI. These have been with random intercepts and then with random intercepts and slopes for the NDVI measure.
+
+```{r}
+mod_2a <- lmer(CRMCYTOTC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_2b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_2c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_3a <- lmer(CRMCYTOTC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_3b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_3c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+```
+Now let's add the level 1 covariates and see how things change. Only the violent and property crimes will be used. First with only random intercepts. 
+```{r}
+mod_4b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (1|city_st), data = df_na)
+mod_4c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (1|city_st), data = df_na)
+
+summary(mod_4b)
+summary(mod_4c)
+```
+Do these models have a better fit compared the models without the covariates?
+```{r}
+glance(mod_2b)
+glance(mod_4b)
+anova(mod_2b, mod_4b)
+anova(mod_2c, mod_4c)
+```
+and then add the random slope for NDVI.
+```{r}
+mod_5b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_5c <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+
+summary(mod_5b)
+summary(mod_5c)
+```
+Compare models.
+```{r}
+anova(mod_3b, mod_5b)
+anova(mod_4b, mod_5b)
+anova(mod_3c, mod_5c)
+anova(mod_4c, mod_5c)
+
+```
+
