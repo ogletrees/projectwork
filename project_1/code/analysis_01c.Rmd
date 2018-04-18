@@ -56,4 +56,26 @@ anova(mod_3c, mod_5c)
 anova(mod_4c, mod_5c)
 
 ```
+Check the covariance structure
+```{r}
+VarCorr(mod_5b)$city_st
+# these values are the 'error' terms that are added to the estimates. The estimates are the average and these random effects are the adjustments.
+myrandomeff <- ranef(mod_5b, condVar = TRUE)
+
+
+
+base::mean(myrandomeff$city_st$gndctr_ndvi_cbg_adj)
+myrandomeff$city_st %>% ggplot(aes(`(Intercept)`, gndctr_ndvi_cbg_adj)) + geom_point() + ggtitle("random effects (adjustments for cities) - Violent Crime")
+modcoef <- coef(mod_5b)$city_st
+modcoef %>% ggplot(aes(`(Intercept)`, gndctr_ndvi_cbg_adj)) + geom_point() + ggtitle("Intercept and slope estimates - Violent Crime")
+```
+
+The intercept variance has increased with the varying slopes, let's look at a plot to see what is going on.
+```{r}
+ricoeff <- coef(mod_4b)$city_st
+df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj,CRMCYPERC)) + geom_point(alpha=0) +geom_abline(data = ricoeff, aes(intercept=`(Intercept)`, slope=gndctr_ndvi_cbg_adj), alpha = 0.2) + labs(title = "Random Intercepts")
+
+df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj,CRMCYPERC)) + geom_point(alpha=0) +geom_abline(data = modcoef, aes(intercept=`(Intercept)`, slope=gndctr_ndvi_cbg_adj), alpha = 0.2) + labs(title = "Random Intercepts & Slopes")
+
+```
 
