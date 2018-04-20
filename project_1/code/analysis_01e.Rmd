@@ -1,0 +1,68 @@
+---
+title: "Initial Analysis - grand center NDVI + L1 covariates + L2 covariates"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+```
+Let's now add the level 2 variables to see how things change!
+
+Build up some models. I will just start with the violent crime data first.
+```{r}
+mod_2b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_3b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_4b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (1|city_st), data = df_na)
+mod_5b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+
+mod_6b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_MetroGDP + gndctr_Police + gndctr_rt_violent + clust4 + (1|city_st), data = df_na)
+
+mod_7b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clust4  + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_MetroGDP + gndctr_Police + gndctr_rt_violent + (1|city_st), data = df_na)
+
+options(scipen = 999)
+
+```
+You can compare models with likelihood ration tests and bootstraping too.
+```{r}
+anova(mod_2b, mod_3b)
+anova(mod_3b, mod_4b)
+anova(mod_4b, mod_5b)
+anova(mod_5b, mod_6b)
+anova(mod_6b, mod_7b)
+```
+So 5 to 6 is weird, what if I flip it?
+```{r}
+anova(mod_6b, mod_5b)
+RLRsim::exactRLRT(mod_6b)
+```
+Still weird. Oh wait, I am comparing a model with random slope and one without, maybe that isn't good.
+```{r}
+logLik(mod_5b)* -2
+logLik(mod_6b)* -2
+717437.7 - 719577.9
+summary(mod_6b)
+
+anova(mod_5b, mod_6b, test = "LRT")
+
+glance(mod_2b)
+glance(mod_7b)
+
+mod_6c <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_MetroGDP + gndctr_Police + gndctr_rt_violent+clust4 + (gndctr_ndvi_cbg_adj|city_st), data = df_na, REML = FALSE)
+anova(mod_5b, mod_6c)
+anova(mod_4b, mod_6b)
+```
+```{r}
+plot(mod_6c)
+```
+
+

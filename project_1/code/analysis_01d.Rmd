@@ -1,0 +1,49 @@
+---
+title: "Initial Analysis - grand center NDVI + L1 covariates + L2 covariates"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+```
+Let's now add the level 2 variables to see how things change!
+
+Build up some models. I will just start with the violent crime data first.
+```{r}
+mod_2b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_3b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_4b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (1|city_st), data = df_na)
+mod_5b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+
+mod_6b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_MetroGDP + gndctr_Police + gndctr_rt_violent + clust4 + (1|city_st), data = df_na)
+
+options(scipen = 999)
+summary(mod_6b)
+```
+As the clustering is based on temperature and precipitation, perhaps let's have a look at those in a model. Maybe later as I didn't include those in this dataset :)
+
+How about an interaction instead.
+```{r}
+mod_7b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clust4  + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_MetroGDP + gndctr_Police + gndctr_rt_violent + (1|city_st), data = df_na)
+
+summary(mod_7b)
+```
+and compare those models
+```{r}
+anova(mod_5b, mod_6b, mod_7b)
+#anova(mod_6b, mod_7b)
+
+glance(mod_5b)
+glance(mod_6b)
+glance(mod_7b)
+```
+

@@ -1,0 +1,26 @@
+2018-04-15
+
+If choosing 4 cities based on mean population:
+
+For the 4 climate regions
+1 - Henderson, NV - 285667
+2 - Tulsa, OK - 403505
+3 - Orlando, FL - 270934
+4 - Spokane, WA - 213272
+
+If using median population:
+
+For the 4 climate regions
+1 - Palmdale and Lancaster, CA
+2 - Newport News, VA
+3 - Frisco, TX, McKinney, TX
+4 - Naperville, IL; Joliet, IL
+
+
+If using mean population density:
+
+For the 4 climate regions
+1 - Las Vegas, NV
+2 - Worchester, MA
+3 - Davie, FL
+4 - West Valley City, UT
