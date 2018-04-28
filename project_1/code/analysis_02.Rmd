@@ -1,0 +1,143 @@
+---
+title: "Initial Analysis - a run through the process"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+library(HLMdiag)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+city <- readRDS("../data/city_all.rds")
+```
+First, there are likely some cities that are kind of outliers from everything else. I think these could be 'megacities', though 'megacities are > 10,000,000 population. Let's see anyway.
+```{r}
+city %>% ggplot(aes(x = "x",Pop2015)) + geom_boxplot()
+```
+None over 10 million in the city, but 2 million+ starts to get out there.
+```{r}
+city %>% filter(Pop2015 > 2000000) %>% dplyr::select(city_st)
+
+city%>% filter(Pop2015 < 2000000) %>% ggplot(aes(x = "x",Pop2015)) + geom_boxplot()
+```
+Initially I will carry on with these, but will investigate how things are if they are excluded later.
+
+### Correlation Only
+
+The focus is on how greenspace and crime are related. First we'll just see how they are correlated. The analysis will use only violent crime initially, then once the process if wored out we can do property crime.
+```{r}
+cor.test(df$CRMCYPERC, df$ndvi_mean_cbg_adj)
+cor.test(df_urban$CRMCYPERC, df_urban$ndvi_mean_cbg_adj)
+```
+Straight up violent crime and NDVI in block groups are correlated at `r round(cor(df$CRMCYPERC, df$ndvi_mean_cbg_adj), 3)`. Positive but not strong at all. Urban block groups are only slightly higher.
+
+### Linear Regression
+
+Though it is not the proper way to approach the data, we'll start with linear regression since that is how all of the books do it.
+
+```{r}
+mod_1a <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj, data = df)
+mod_1b <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj, data = df_urban)
+
+screenreg(list(mod_1a, mod_1b))
+```
+Quite unimpressive. This of course is ignoring all grouping within cities. 
+
+Let's add block group level covariates and mean center those across all of the data (grand mean)
+
+```{r}
+mod_1c <- lm(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden + gndctr_U18, data = df)
+mod_1d <- lm(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden + gndctr_U18, data = df_urban)
+
+screenreg(list(mod_1c, mod_1d))
+```
+Perhaps look at the diagnotic plots to see what is going on.
+```{r}
+plot(mod_1c)
+```
+From this we can see some heteroscidacity with residuals spreading out at higher fitted values. QQ also shows some non-normalness. So obviously a linear regression isn't going to cut it.
+
+### Multilevel Models
+
+Hox (2010) says start simple and work up, so lets take that approach. First an intercept only model.
+```{r}
+mod_2a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+mod_2b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_urban)
+screenreg(list(mod_2a, mod_2b))
+```
+Big change in the effect of NDVI when we account for cities. Now it is negative and much larger. Model 1 is all cbg and model 2 is just urban. Let's look at the plots.
+```{r}
+plot(mod_2a)
+plot(mod_2b)
+```
+There definitely is a pattern. What could be the cause if that?
+
+Carry on with level 1 covariates.
+```{r}
+mod_3a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden + gndctr_U18 + (1|city_st), data = df)
+mod_3b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden + gndctr_U18 + (1|city_st), data = df_urban)
+
+screenreg(list(mod_2a, mod_2b, mod_3a, mod_3b), custom.model.names = c("all cbg", "urban", "all cbg", "urban"))
+```
+So under 18 isn't providing anything, but everything else is still contributing.  
+What about the plot for these with the covariates?
+```{r}
+plot(mod_3a)
+plot(mod_3b)
+```
+Interesting, no real change there, still an issue present.
+```{r}
+L1resid <- resid(mod_3a)
+t <- mod_3a@frame
+t$L1res <-  resid(mod_3a)
+# head(t)
+t %>% ggplot(aes(CRMCYPERC, L1res)) + geom_point(alpha = .2)
+```
+Here with crime against the residuals you can see that the higher the crime index the higher the residual.
+
+So far we have only allowed the intercept, or mean value, vary between cities. We can also add NDVI as a varying slope, let's try that. We'll drop the under 18 too as it was not significant in the previous model.
+```{r}
+mod_4a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden+ (gndctr_ndvi_cbg_adj|city_st), data = df)
+mod_4b <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_urban)
+
+screenreg(list(mod_4a, mod_4b), custom.model.names = c("all cbg", "urban"))
+```
+and look at that plot again...
+```{r}
+plot(mod_4a)
+plot(mod_4b)
+```
+Well, no change it seems. Something will need to be done to address that variance structure.
+
+```{r}
+car::leveneTest(t$L1res ~ t$city_st )
+```
+With a signifinact Levene's Test this confirms that there are differences in the variance across groups.
+
+One solution is to log transform the response.
+```{r}
+mod_4c <- lmer(log(CRMCYPERC) ~ gndctr_ndvi_cbg_adj + gndctr_diver + gndctr_disad + gndctr_MedHHinc000 + gndctr_logpopden+ (gndctr_ndvi_cbg_adj|city_st), data = df)
+screenreg(mod_4c)
+plot(mod_4c)
+# car::leveneTest(residuals(mod_4c) ~ mod_4c@frame$city_st )
+```
+
+https://stats.stackexchange.com/questions/255546/test-homogeneity-in-lmer-models
+
+```{r}
+t %>% group_by(city_st) %>% summarise(avgvar = mean(L1res), varrange = max(L1res)-min(L1res)) %>% arrange(desc(avgvar))
+```
+

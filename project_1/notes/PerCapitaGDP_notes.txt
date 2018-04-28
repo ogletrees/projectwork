@@ -1,0 +1,8 @@
+https://www.bea.gov/regional/downloadzip.cfm
+
+Real GDP by metropolitan area
+Real GDP by metropolitan area is an inflation-adjusted measure of each metropolitan area's gross product that is based on national prices for the goods and services produced within the metropolitan area. The real estimates of gross domestic product (GDP) by metropolitan area are measured in chained (2009) dollars.
+
+https://www.bea.gov/regional/definitions/
+
+https://en.wikipedia.org/wiki/Chained_dollars
