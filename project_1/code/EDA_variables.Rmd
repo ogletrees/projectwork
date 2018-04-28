@@ -1,0 +1,57 @@
+---
+title: "Variable exploration"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+# library(HLMdiag)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+city <- readRDS("../data/city_all.rds")
+```
+
+The variable of interest is crime. It is measured by a crime risk index where 100 equals the national average in a crime category. A value of 50 would indicate half the average risk.
+
+There are 2 aggregates, one for violent and one for property crime, that we will investigate first.
+
+```{r}
+df %>% ggplot(aes(CRMCYPERC)) + geom_density() + ggtitle("Violent Crime") + geom_vline(xintercept = mean(df$CRMCYPERC), color = "red")
+df %>% ggplot(aes(x = "x", y = CRMCYPERC)) + geom_boxplot() + coord_flip() + geom_hline(yintercept = mean(df$CRMCYPERC), color = "red") + ggtitle("Violent Crime")
+
+
+df %>% ggplot(aes(CRMCYPROC)) + geom_density() + ggtitle("Property Crime") + geom_vline(xintercept = mean(df$CRMCYPROC), color = "red")
+df %>% ggplot(aes(x = "x", y = CRMCYPROC)) + geom_boxplot() + coord_flip() + geom_hline(yintercept = mean(df$CRMCYPROC), color = "red") + ggtitle("Property Crime")
+```
+
+Now the main explanatory variable is the greenspace measure, which is the mean NDVI for a block group.
+
+```{r}
+df %>% ggplot(aes(ndvi_mean_cbg_adj)) + geom_density() + ggtitle("NDVI - block group") + geom_vline(xintercept = mean(df$ndvi_mean_cbg_adj), color = "red")
+df %>% ggplot(aes(x = "x", y = ndvi_mean_cbg_adj)) + geom_boxplot() + coord_flip() + geom_hline(yintercept = mean(df$ndvi_mean_cbg_adj), color = "red") + ggtitle("NDVI - block group")
+```
+
+We can look at the level 1, or block group variables together.
+```{r}
+c2 <- as.matrix(df %>% dplyr::select(CRMCYPERC, CRMCYPROC, ndvi_mean_cbg_adj, MedHHinc_000, disad, divindex, log_popden_cbg))
+Hmisc::rcorr(c2)
+```
+This has been using all of the in city cbg's, look at just the *urban* ones
+```{r}
+c3 <- as.matrix(df_urban %>% dplyr::select(CRMCYPERC, CRMCYPROC, ndvi_mean_cbg_adj, MedHHinc_000, disad, divindex, log_popden_cbg))
+Hmisc::rcorr(c3)
+```
+

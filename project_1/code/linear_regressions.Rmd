@@ -1,0 +1,76 @@
+---
+title: "Linear Regressions"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+# library(HLMdiag)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+city <- readRDS("../data/city_all.rds")
+```
+
+We'll start with all of the block groups and just a bivariate relationship.  
+
+So here is violent crime (the index) and the raw mean NDVI values for block groups.  
+$$
+Crime_i=\alpha+\beta NDVI_i + \epsilon_i
+$$
+```{r}
+mod_1 <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj, data = df)
+tidy(mod_1)
+plot(mod_1)
+hist(residuals(mod_1))
+```
+
+Now add the level 1 covariates and see what happens.
+
+$$
+Crime_i = \alpha + \beta NDVI_i + \beta_{...} L1\ covariates_i + \epsilon_i
+$$
+
+```{r}
+mod_2 <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + log_popden_cbg, data = df)
+tidy(mod_2)
+plot(mod_2)
+hist(residuals(mod_2))
+```
+
+Now add the city level variables to see how linear regression does, though it is not addressing our questions.
+
+$$
+Crime_i = \alpha + \beta NDVI_i + \beta_{...} L1\ covariates_i + \beta_{...} L2\ covariates_i +\epsilon_i
+$$
+
+```{r}
+mod_3 <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + log_popden_cbg + factor(clust4) + Pop2015 + rate_violentcrime + PCgdp15 + PerCapitaOfficers1000, data = df)
+tidy(mod_3)
+plot(mod_3)
+hist(residuals(mod_3))
+
+screenreg(list(mod_1, mod_2, mod_3))
+```
+
+These analyses have been on raw data, not centered. The only transformation has been in population density, to its log form.  
+One thing that has been seen is that NDVI is in a bimodal distribution, not sure if that could have an effect on this down the road.  
+While the plots show issues with the QQ plot, the historgram of residuals shows a normal distribtion with a mean of 0 and $\sigma^2$
+
+Some things to consider:
+
+- the crime index is a non-negative integer, might point to using a gamma distribution in GLS
+
+- Should plot the explanatory variables against the residuals to see if there is a clue about the heterogenaity on residuals (can see that the higher the fitted value the greater the variance)
