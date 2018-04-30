@@ -1,0 +1,60 @@
+---
+title: "EDA on variables"
+date: 2018-04-27
+output: html_notebook
+---
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(psych)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+
+```
+Some variables seem to be exhibiting behavior that indicates that there may be a need for transformation or other adjustments. Let's take a look at some of them.
+
+First, the response variable, which is the crime risk index at the block group level.
+```{r}
+describe(df$CRMCYPERC)
+describe(df$CRMCYPROC)
+```
+Look at the distribution of these 2 crime index variables
+```{r}
+df %>% ggplot(aes(CRMCYPERC)) + geom_density() + geom_vline(xintercept = mean(df$CRMCYPERC))
+df %>% ggplot(aes(CRMCYPROC)) + geom_density() + geom_vline(xintercept = mean(df$CRMCYPROC))
+```
+The skewness is not above 2 which would indicate that these are not too skewed. THe JB test can give an indication of normality.
+```{r}
+moments::jarque.test(df$CRMCYPERC)
+moments::jarque.test(df$CRMCYPROC)
+```
+With a p-value of < 0.05 we would say that the distribution is not normal for either variable. This is the start of issues in modeling I would think.
+
+One way to deal with that is to log transform, let's examine that.
+```{r}
+log_viol <- log(df$CRMCYPERC)
+log_prop <- log(df$CRMCYPROC)
+
+df %>% ggplot(aes(log_viol)) + geom_density() + geom_vline(xintercept = mean(log_viol))
+df %>% ggplot(aes(log_prop)) + geom_density() + geom_vline(xintercept = mean(log_prop))
+```
+Test these with the JB test
+```{r}
+describe(log_viol)
+describe(log_prop)
+
+moments::jarque.test(log_viol)
+moments::jarque.test(log_prop)
+```
+That seems to not have done it.
+
+One thing may be some extreme values, look at that in the variables.
+```{r}
+df %>% ggplot(aes(x = "Violent", CRMCYPERC)) + geom_boxplot()
+df %>% mutate(ViolentZ = as.vector(scale(CRMCYPERC))) %>% filter(ViolentZ < 3) %>% ggplot(aes(log(CRMCYPERC))) + geom_density()
+```
+998 block groups have a violent crime index beyond 3 standard deviations. Distribution is still skewed with these removed when looking at density plot.
+
+```{r}
+qqnorm(log(df$CRMCYPERC))
+```
