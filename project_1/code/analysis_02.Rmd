@@ -141,3 +141,12 @@ https://stats.stackexchange.com/questions/255546/test-homogeneity-in-lmer-models
 t %>% group_by(city_st) %>% summarise(avgvar = mean(L1res), varrange = max(L1res)-min(L1res)) %>% arrange(desc(avgvar))
 ```
 
+I can check the residuals to see if they are looking normally distributed despit the plot
+```{r}
+hist(residuals(mod_4c))
+hist(residuals(mod_4a))
+hist(residuals(mod_4b))
+# curve(dnorm(x, mean=mean(residuals(mod_4c)), sd=sd(residuals(mod_4c))), add=TRUE)
+# moments::jarque.test(residuals(mod_4c))
+```
+
