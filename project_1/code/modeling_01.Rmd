@@ -1,0 +1,241 @@
+---
+title: "Modeling - article 1"
+output: html_notebook
+---
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+
+df <- readRDS("../data/full_mlm_datset.rds")
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+city <- readRDS("../data/city_all.rds")
+```
+First, determine the ICC values.
+
+```{r, echo=FALSE}
+tot_anov <- aov(df$CRMCYTOTC ~ as.factor(df$city_st))
+viol_anov <- aov(df$CRMCYPERC ~ as.factor(df$city_st))
+prop_anov <- aov(df$CRMCYPROC ~ as.factor(df$city_st))
+ndvi_anov <- aov(df$ndvi_mean_cbg_adj ~ as.factor(df$city_st))
+```
+The ICC1 for the total crime index is `r ICC1(tot_anov)`.  
+The ICC1 for the violent crime index is `r ICC1(viol_anov)`.  
+The ICC1 for the property crime index is `r ICC1(prop_anov)`.  
+The ICC1 for the mean NDVI is `r ICC1(ndvi_anov)`.  
+
+The ICC1 is the proportion of variance in the variable that is attributable to difference between cities. Another way to put it is:  
+For the measure of total crime, `r round(ICC1(tot_anov) * 100, 0)`% of the variance in the total crime index is at the city level (Hox, 2010).
+
+### Intercept only model
+
+Run a model with only varying intercepts for the crime variables. This will serve as a base line for further modeling. One model for violent crime and one for property crime.
+```{r}
+mod_1a <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df)
+mod_1b <- lmer(CRMCYPROC ~ 1 + (1|city_st), data = df)
+screenreg(list(mod_1a, mod_1b))
+```
+Maybe see what the plot is for these models.
+```{r}
+plot(mod_1a)
+hist(residuals(mod_1a))
+```
+While there appears to be lack of homegeneity in the residuals, they are also normally distributed.
+
+### Add NDVI (greenspace)
+
+Starting simple we will add NDVI to the model as a varying intercept. The NDVI values are NOT centered.
+```{r}
+mod_2a <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (1|city_st), data = df)
+mod_2b <- lmer(CRMCYPROC ~ ndvi_mean_cbg_adj + (1|city_st), data = df)
+screenreg(list(mod_2a, mod_2b))
+```
+We can compare these to the intercept only model.
+```{r}
+anova(mod_1a, mod_2a)
+anova(mod_1b, mod_2b)
+```
+Unsurprisingly they are better.
+
+How do the residuals look?
+```{r}
+plot(mod_2a)
+hist(residuals(mod_2a))
+```
+
+If we use the grand mean centered NDVI only the intercept would change.
+
+#### NDVI random slope
+
+As we are interested in the relationship between NDVI and crime we can add a varying slope to the model.
+```{r}
+mod_2c <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (ndvi_mean_cbg_adj|city_st), data = df)
+mod_2d <- lmer(CRMCYPROC ~ ndvi_mean_cbg_adj + (ndvi_mean_cbg_adj|city_st), data = df)
+screenreg(list(mod_2c, mod_2d))
+```
+Are these better that the random intercept model?
+```{r}
+anova(mod_2a, mod_2c)
+anova(mod_2b, mod_2d)
+```
+Yes.
+
+At this point we can say that as NDVI increases by 1 (or 0.1 on original scale) the violent crime index will change by `r  round(tidy(mod_2c)[2, 2], 1)` on average across all cities. The coefficient for NDVI slope across cities has a standard deviation of `r  round(tidy(mod_2c)[4, 2], 1)`.
+
+As NDVI increases by 1 unit the value of ht property crime index changes by `r  round(tidy(mod_2d)[2, 2], 1)` on average across cities.
+
+Until this point there are no covariates of crime and the NDVI meansure is not centered, so the intercept is the value at NDVI = 0, which is bare rock or water - no very helpful.
+
+### Center NDVI
+
+I will run the previous model with NDVI grand mean centered so that 0 equals the mean NDVI across all block groups in the study.
+
+```{r}
+mod_3a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+mod_3b <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df)
+screenreg(list(mod_3a, mod_3b))
+```
+Everything is the same expect for the intercept.  
+Now for the varying slope model.
+```{r}
+mod_3c <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df)
+mod_3d <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df)
+screenreg(list(mod_3c, mod_3d))
+```
+With the uncentered NDVI there was a strong correlation between the slope and the intercept. Now that NDVI is centered is it still there?
+```{r}
+tidy(mod_2c)[5, 2]
+tidy(mod_3c)[5, 2]
+
+tidy(mod_2d)[5, 2]
+tidy(mod_3d)[5, 2]
+```
+It has been reduced.
+
+### Level 1 covariates
+
+Now I will add level one covariates tot he model. As the random slope model performed better that the random intercept model I will build off of that. The level 1 varialbes will be grand mean centered so that the intercept will be the crime value when a block group is at the overall average on the variables.
+```{r}
+mod_4a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_4b <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+screenreg(list(mod_4a, mod_4b))
+```
+Are these better than the model without the level 1 covariates?  
+Now the model with median income uses fewer cases as some have NA in that variable. The comparison model will need to be refit with a reduced datset.
+```{r}
+mod_3e <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_3f <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+anova(mod_3e, mod_4a)
+anova(mod_3f, mod_4b)
+```
+The models with level 1 covariates fit the data better at $\chi^2$=27497, df=5, p<0.001
+
+At this point let's see what reduction in variance we have acheived.
+
+In the violent crime intercept only model the Residual variance = 17666.65  
+Adding NDVI as a random intercept Residual variance = 16709.09  
+Adding NDVI as a random slope Residual variance = 15622.39  
+With level 1 covariates Residual variance = 9505.99  
+
+Variance in the intercept with the violent crime:  
+Intercept only = 8111.60  
+NDVI intercept =  11755.35 (non-centered)
+NDVI slope =  50909.81 (non-centered)  
+NDVI slope =  16355.39 (centered)  
+Level 1 covariates = 8429.06  
+
+Adding NDVI as a random intercept reduced residual variance `r round(((17666.65-16709.09)/17666.65)*100, 2) `%. Adding a random slope for NDVI reduced the residual variance `r round(((16709.09-15622.39)/16709.09)*100, 2) `% from a model with only a random intercept for NDVI. Then adding level 1 covariates reduces the residual variance a further `r round(((15622.39-9505.99)/15622.39)*100, 2) `%. From the intercept only model to the level 1 covariate model residual variance was decreased `r round(((17666.65-9505.99)/17666.65)*100, 2) `%.
+
+### Level 2 covariates
+
+There are variables measured at the level of the city and we want to know if they influence crime. We will continue with the random slope version.
+```{r}
+mod_5a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_rt_violent + clust4 + PCgdp15 + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_5b <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_rt_property + clust4 + PCgdp15 +(gndctr_ndvi_cbg_adj|city_st), data = df_na)
+screenreg(list(mod_5a, mod_5b))
+```
+Are these better than the model with just level 1 covariates?
+```{r}
+anova(mod_4a, mod_5a)
+anova(mod_4b, mod_5b)
+```
+Yes. 
+
+The previous model used a categorical variable for the climate region. I can use temperature and precipitation too, let's give it a go.
+```{r}
+mod_5c <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_rt_violent + PCgdp15 + city_t_mean + city_p_mean  + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_5d <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_rt_property + PCgdp15 + city_t_mean + city_p_mean  +(gndctr_ndvi_cbg_adj|city_st), data = df_na)
+screenreg(list(mod_5c, mod_5d))
+```
+The police variable is not significant so we will drop it and run again.
+```{r}
+mod_5e <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_rt_violent + PCgdp15 + city_t_mean + city_p_mean  + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_5f <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden  + gndctr_rt_property + PCgdp15 + city_t_mean + city_p_mean  +(gndctr_ndvi_cbg_adj|city_st), data = df_na)
+screenreg(list(mod_5e, mod_5f))
+```
+
+#### marginal plots
+
+```{r}
+sjp.lmer(mod_5e, type = "fe", p.kr = FALSE, y.offset = 0.4)
+```
+
+#### Relationship investigation
+
+So some cities can have a positive relationship between NDVI and crime, let's look at those.
+
+```{r}
+preds <- ranef(mod_5e)$city_st
+preds$city_st <- row.names(preds)
+
+mean(preds$gndctr_ndvi_cbg_adj)
+sd(preds$gndctr_ndvi_cbg_adj)
+preds$ndvi_slope <- -28.49 + preds$gndctr_ndvi_cbg_adj
+hist(preds$ndvi_slope)
+preds$p.int <- 151.15 + preds$`(Intercept)`
+
+pos_city <- preds %>% filter(ndvi_slope > 0)
+pos_city %>% dplyr::select(city_st, ndvi_slope, p.int) %>% arrange(desc(ndvi_slope))
+
+```
+and who are the ones with the strongest negative relationship at this point?
+```{r}
+preds %>% arrange(ndvi_slope) %>% slice(1:10) %>% dplyr::select(city_st, ndvi_slope, p.int)
+cor.test(preds$ndvi_slope, preds$p.int)
+
+```
+
+
+
+
+
+A plot of these slopes would be...
+```{r}
+df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj, CRMCYPERC)) + geom_point(alpha = 0) + geom_abline(aes(slope=ndvi_slope, intercept=p.int), data = preds, alpha = .2) + labs(x = "NDVI", y = "Violent Crime Index", title = "Violent Crime random slopes")
+```
+and look at the residuals of the last model.
+```{r}
+plot(mod_5e)
+
+hist(residuals(mod_5e))
+
+rdf <- mod_5e@frame %>% mutate(rsd = residuals(mod_5e))
+
+rdf %>% ggplot(aes(gndctr_MedHHinc000, rsd)) + geom_point(alpha = .3) + labs(y="residual")
+rdf %>% ggplot(aes(gndctr_ndvi_cbg_adj, rsd)) + geom_point(alpha = .3) + labs(y="residual")
+rdf %>% ggplot(aes(gndctr_disad, rsd)) + geom_point(alpha = .3) + labs(y="residual")
+rdf %>% ggplot(aes(gndctr_diver, rsd)) + geom_point(alpha = .3) + labs(y="residual")
+rdf %>% ggplot(aes(gndctr_logpopden, rsd)) + geom_point(alpha = .3) + labs(y="residual")
+```
+
+
