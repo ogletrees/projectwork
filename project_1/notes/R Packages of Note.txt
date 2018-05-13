@@ -1,0 +1,14 @@
+ftp://cran.r-project.org/pub/R/web/packages/visreg/visreg.pdf
+
+ecospat
+
+    "rpostgis",          # R Interface to a 'PostGIS' Database
+    "rpostgisLT",        # Managing Animal Movement Data with 'PostGIS' and R
+
+"CircStats",         # Circular Statistics, from "Topics in circular Statistics" (2001)
+
+"styler",            # Non-Invasive Pretty Printing of R Code
+
+library(devtools)
+install_github("mablab/rpostgis")
+
