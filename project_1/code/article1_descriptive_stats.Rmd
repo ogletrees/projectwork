@@ -1,0 +1,103 @@
+---
+title: "Aritcle 1 - Descriptives"
+output: html_notebook
+---
+
+```{r, echo=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(DataExplorer)
+library(psych)
+library(patchwork)
+
+# the data
+df <- readRDS("../data/full_mlm_datset.rds")
+# add variables that are newer -  climate clusters based on doys above 90
+city <- readRDS("../data/city_all.rds")
+city2 <- city %>% select(city_st, clust90_4)
+df <- df %>% left_join(city2)
+```
+I want some descriptives of the data, start with the variable of interest, crime. This is the crime risk index measured at the block groups, for violent and property crime.
+```{r}
+describe(df$CRMCYPERC)
+describe(df$CRMCYPROC)
+plot_density(df$CRMCYPERC, title = "Violent Crime")
+plot_density(df$CRMCYPROC, title = "Property Crime")
+```
+Crime is at level 1 - block groups. Across cities the descriptive statistics are:
+```{r}
+c_crime <- df %>% group_by(city_st) %>% summarise(violent_mean = mean(CRMCYPERC), property_mean = mean(CRMCYPROC))
+c_crime %>% summarise(v_mean = mean(violent_mean), v_sd = sd(violent_mean), p_mean = mean(property_mean), p_sd = sd(property_mean))
+plot_density(c_crime$violent_mean, title = "City-Violent Crime")
+plot_density(c_crime$property_mean, title = "City-Property Crime")
+```
+
+The level one predictors are:
+
+- NDVI
+- Disadvantage
+- Racial Diveristy
+- Median Household Income
+- Population Density
+- Percent of populaiton under 18
+
+```{r}
+options(width = 100)
+df %>% select(ndvi_mean_cbg_adj, disad, divindex, MedHHinc_000, PopDen15, PcU18_whole) %>% describe()
+
+p1 <- df %>% ggplot(aes(ndvi_mean_cbg_adj)) + geom_density()
+p2 <- df %>% ggplot(aes(disad)) + geom_density()
+p3 <- df %>% ggplot(aes(divindex)) + geom_density()
+p4 <- df %>% ggplot(aes(MedHHinc_000)) + geom_density()
+p5 <- df %>% ggplot(aes(PopDen15)) + geom_density()
+p6 <- df %>% ggplot(aes(PcU18_whole)) + geom_density()
+p1 + p2 + p3 + p4 + plot_layout(ncol = 2)
+p5 + p6
+```
+| Variables        | Mean          | Std. Dev.  | Min | Max |
+| ------------- |:-------------:| -----:| ---: | ---: |
+| Outcome Variable (n= `r nrow(df)`)    |  |  | | |
+| &nbsp; &nbsp; Crime - Violent      | `r round(mean(df$CRMCYPERC), 2)`     |   `r round(sd(df$CRMCYPERC), 2)` | `r min(df$CRMCYPERC)` | `r max(df$CRMCYPERC)` |
+| &nbsp; &nbsp; Crime - Property      | `r round(mean(df$CRMCYPROC), 2)`     |   `r round(sd(df$CRMCYPROC), 2)` | `r min(df$CRMCYPROC)` | `r max(df$CRMCYPROC)` |
+| Level One Variables    |  |  | | |
+| &nbsp; &nbsp; NDVI      | `r round(mean(df$ndvi_mean_cbg_adj), 2)`     |   `r round(sd(df$ndvi_mean_cbg_adj), 2)` | `r min(df$ndvi_mean_cbg_adj)` | `r max(df$ndvi_mean_cbg_adj)` |
+| &nbsp; &nbsp; Disadvantage Index      | `r round(mean(df$disad, na.rm=T), 2)`     |   `r round(sd(df$disad, na.rm=T), 2)` | `r min(df$disad, na.rm=T)` | `r max(df$disad, na.rm=T)` |
+| &nbsp; &nbsp; Diversity Index      | `r round(mean(df$divindex, na.rm=T), 2)`     |   `r round(sd(df$divindex, na.rm=T), 2)` | `r min(df$divindex, na.rm=T)` | `r max(df$divindex, na.rm=T)` |
+| &nbsp; &nbsp; Median Household Income      | `r round(mean(df$MedHHinc_000, na.rm=T), 2)`     |   `r round(sd(df$MedHHinc_000, na.rm=T), 2)` | `r min(df$MedHHinc_000, na.rm=T)` | `r max(df$MedHHinc_000, na.rm=T)` |
+| &nbsp; &nbsp; Population Density      | `r round(mean(df$PopDen15), 2)`     |   `r round(sd(df$PopDen15), 2)` | `r min(df$PopDen15)` | `r round(max(df$PopDen15), 0)` |
+| &nbsp; &nbsp; Percent under 18      | `r round(mean(df$PcU18_whole, na.rm=T), 2)`     |   `r round(sd(df$PcU18_whole, na.rm=T), 2)` | `r min(df$PcU18_whole, na.rm=T)` | `r max(df$PcU18_whole, na.rm=T)` |
+
+Level 2 Variables
+
+Level 2 variables are:
+
+- Metro GDP
+- Metro Per Capita GDP
+- Police Officers per 1,000 population
+- Climate Cluster Category
+- Crime Rate per 1,000 population
+
+```{r}
+options(width = 100)
+df %>% select(MetroGDP, PCgdp15, PerCapitaOfficers1000, rate_violentcrime, rate_propertycrime) %>% describe()
+
+p7 <- df %>% ggplot(aes(MetroGDP)) + geom_density()
+p8 <- df %>% ggplot(aes(PCgdp15)) + geom_density()
+p9 <- df %>% ggplot(aes(PerCapitaOfficers1000)) + geom_density()
+p10 <- df %>% ggplot(aes(rate_violentcrime)) + geom_density()
+p11 <- df %>% ggplot(aes(rate_propertycrime)) + geom_density()
+p7 + p8 + p9 + p10 + p11 + plot_layout(ncol = 2)
+```
+### By Cluster
+
+The cities are categorized by climate into 4 clusters, let's look at the characteristics by each.
+
+```{r}
+df %>% ggplot(aes(factor(clust90_4), ndvi_mean_cbg_adj)) + geom_boxplot() +ggtitle("NDVI across clusters")
+df %>% ggplot(aes(factor(clust90_4), CRMCYPERC)) + geom_boxplot() +ggtitle("Violent Crime across clusters")
+df %>% ggplot(aes(factor(clust90_4), CRMCYPROC)) + geom_boxplot() +ggtitle("Property Crime across clusters")
+
+df %>% ggplot(aes(factor(clust90_4), rate_violentcrime)) + geom_boxplot() +ggtitle("Violent Crime across clusters")
+df %>% ggplot(aes(factor(clust90_4), rate_propertycrime)) + geom_boxplot() +ggtitle("Property Crime across clusters")
+```
+
