@@ -2,6 +2,9 @@
 # S Ogletree
 # Description: Verify climate cluster categories
 
+library(dplyr)
+library(ggplot2)
+
 city <- readRDS("../data/city_all.rds")
 
 str(city$clust90_4)
@@ -20,5 +23,8 @@ us <- map_data("state")
 city %>% filter(clustname == "warm-wet-hi") %>% View()
 city %>% ggplot(aes(INTPTLON, INTPTLAT, color= clustname)) + geom_point() 
 
-ggplot() + geom_map(data=us, map=us, aes(x=long, y=lat, map_id=region)) + geom_point(data = city, aes(INTPTLON, INTPTLAT, color= clustname)) + ggtitle("City Climate Clusters based on 3 variables")
-ggsave("../figures/CityClimateClusters_20180519.pdf", width = 11)
+ggplot() + coord_map(projection = "albers",lat0=39, lat1=45) + geom_map(data=us, map=us, aes(x=long, y=lat, map_id=region)) + geom_point(data = city, aes(INTPTLON, INTPTLAT, color= clustname)) + ggtitle("City Climate Clusters based on 3 variables")
+# ggsave("../figures/CityClimateClusters_20180519.pdf", width = 11)
+
+head(city)
+saveRDS(city, "../data/city_all.rds")
