@@ -1,0 +1,83 @@
+---
+title: "Modeling - article 1"
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+output: pdf_document
+---
+```{r setup, echo=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+
+
+city <- readRDS("../data/city_all.rds")
+df <- readRDS("../data/full_mlm_datset.rds")
+newclust <- city[, c(1, 68)]
+df <- df %>% left_join(newclust)
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+
+```
+I am going to run the models and then try to print that to a page, in landscape orientation.
+
+First, with the raw, untransformed data. Using the data with NA removed as things like MedHHinc have some NAs.
+
+```{r models 1, results='asis'}
+mod_1 <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df_na)
+mod_2 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (1|city_st), data = df_na)
+mod_3 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (ndvi_mean_cbg_adj|city_st), data = df_na)
+mod_4 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + PcU18_whole + log_popden_cbg + (ndvi_mean_cbg_adj|city_st), data = df_na)
+mod_5 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + PcU18_whole + log_popden_cbg + PerCapitaOfficers1000 + PCgdp15 + factor(clust90_4) + rate_violentcrime + (ndvi_mean_cbg_adj|city_st), data = df_na)
+```
+
+\newpage
+\blandscape
+Landscape
+```{r print1}
+screenreg(list(mod_1, mod_2, mod_3, mod_4, mod_5))
+```
+\elandscape
+
+\newpage
+Now with the grand centered variables
+
+```{r models 2}
+mod_6 <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df_na)
+mod_7 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
+mod_8 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_9 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_10 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + factor(clust90_4) + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+```
+
+\newpage
+\blandscape
+
+```{r print2, echo=FALSE}
+screenreg(list(mod_6, mod_7, mod_8, mod_9, mod_10))
+```
+\elandscape
+
+\newpage
+
+## Interaction
+
+Using grand mean centered variables, level 1 and level 2, let's add the interaction between Green and Climate.
+
+```{r interactions, echo=FALSE}
+
+mod_11 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*factor(clust90_4) + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+
+screenreg(mod_11)
+```
+
