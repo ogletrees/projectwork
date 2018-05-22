@@ -21,7 +21,7 @@ library(texreg)
 
 city <- readRDS("../data/city_all.rds")
 df <- readRDS("../data/full_mlm_datset.rds")
-newclust <- city[, c(1, 68)]
+newclust <- city[, c(1, 69)]
 df <- df %>% left_join(newclust)
 df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
 df_urban <- df %>% filter(Urban == 1)
@@ -38,7 +38,7 @@ mod_1 <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df_na)
 mod_2 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (1|city_st), data = df_na)
 mod_3 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + (ndvi_mean_cbg_adj|city_st), data = df_na)
 mod_4 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + PcU18_whole + log_popden_cbg + (ndvi_mean_cbg_adj|city_st), data = df_na)
-mod_5 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + PcU18_whole + log_popden_cbg + PerCapitaOfficers1000 + PCgdp15 + factor(clust90_4) + rate_violentcrime + (ndvi_mean_cbg_adj|city_st), data = df_na)
+mod_5 <- lmer(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + disad + divindex + PcU18_whole + log_popden_cbg + PerCapitaOfficers1000 + PCgdp15 + clustname + rate_violentcrime + (ndvi_mean_cbg_adj|city_st), data = df_na)
 ```
 
 \newpage
@@ -57,7 +57,7 @@ mod_6 <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df_na)
 mod_7 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
 mod_8 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_9 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
-mod_10 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + factor(clust90_4) + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_10 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + clustname + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 ```
 
 \newpage
@@ -76,8 +76,36 @@ Using grand mean centered variables, level 1 and level 2, let's add the interact
 
 ```{r interactions, echo=FALSE}
 
-mod_11 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*factor(clust90_4) + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_11 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj * clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 
 screenreg(mod_11)
+```
+Take a look at the diagnostics.
+```{r}
+summary(mod_11)
+plot(mod_11)
+```
+
+```{r}
+VarCorr(mod_11)$city_st
+
+RE11 <- ranef(mod_11, condVar = T)
+RE11[[1]] %>% ggplot(aes(`(Intercept)`, gndctr_ndvi_cbg_adj)) + geom_point() + geom_hline(yintercept = 0, color= "red") + geom_vline(xintercept = 0, color= "red") + labs(x = "Intercept", y = "slope (NDVI)")
+```
+The above plot shows the random effects that are applied to the mean effects (intercept and slope) from the model.
+
+Plot the fixed effects.
+```{r}
+sjp.lmer(mod_11, type = "fe", p.kr = FALSE, y.offset = 0.4)
+sjp.lmer(mod_11, type= "re.qq", p.kr = FALSE)
+
+mod_est <- coef(mod_11)
+df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj, CRMCYPERC)) + geom_point(alpha = 0) + geom_abline(aes(slope=gndctr_ndvi_cbg_adj, intercept=`(Intercept)`), data = mod_est[[1]], alpha = .1) + labs(x = "NDVI", y = "Violent Crime Index", title = "Violent Crime random slopes")
+```
+The above plot is the estimated slopes for NDVI for 301 cities, based on model 11.
+
+Isolate the cities with a positive slope.
+```{r posNDVI, paged.print=FALSE, results='asis'}
+mod_est[[1]]%>% mutate(city_st = rownames(.)) %>% filter(gndctr_ndvi_cbg_adj > 0) %>% arrange(gndctr_ndvi_cbg_adj)
 ```
 
