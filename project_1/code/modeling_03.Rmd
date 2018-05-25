@@ -1,0 +1,124 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+library(purrr)
+library(tidyr)
+library(DataExplorer)
+library(jtools)
+
+city <- readRDS("../data/city_all.rds")
+df <- readRDS("../data/full_mlm_datset.rds")
+newclust <- city[, c(1, 69)]
+df <- df %>% left_join(newclust)
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+df_urban <- df %>% filter(Urban == 1)
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+```
+
+**First, check about the distribution of the crime variables**
+
+
+```{r}
+plot_density(df$CRMCYPERC)
+plot_density(df$CRMCYPROC)
+
+plot_density(log(df$CRMCYPERC))
+plot_density(log(df$CRMCYPROC))
+
+```
+For the 2 crime variables, log transforming looks much more normally distributed. 2 options then, transform the response variable or use a GLMM. If specifying a distribution could use a poisson to account for the heavy skew (perhaps).
+
+If transforming, then a 1 unit increase in the explanatory variable equals a *x* log unit change in the response (or  the expected log count for a one-unit increase in X). Sometimes this can also be stated as a % change in the response.
+
+-----
+
+**Try lm vs. glm first**
+
+```{r}
+mod_01 <- lm(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + divindex + disad + log_popden_cbg , data = df)
+mod_02 <- glm(CRMCYPERC ~ ndvi_mean_cbg_adj + MedHHinc_000 + divindex + disad + log_popden_cbg , data = df, family = 'poisson')
+
+summary(mod_01)
+summary(mod_02)
+exp(coef(mod_02))
+```
+So a glm or glmm might be better, maybe :)
+
+-----
+
+**Look at the variables going into the model**
+
+There is a warning that variables are on different scales, look into this.
+
+```{r}
+summary(df[, c(13, 18, 44:67)])
+```
+
+-----
+
+** Subset data and create standardized variables **
+
+```{r}
+model_df <- df_na %>% dplyr::select(GEOID, city_st, gndctr_ndvi_cbg_adj:gndctr_logpopden, gndctr_MetroGDP: PCgdp15, clustname, CRMCYPERC, CRMCYPROC)
+model_df$gndctr_PCgdp15 <- model_df$PCgdp15 - mean(df$PCgdp15, na.rm=T)
+std_df <- model_df %>% mutate_if(is.numeric, funs(scale(.) %>% as.vector)) %>% left_join(df_na[, c(1, 3)])
+```
+
+-----
+
+#### Models
+
+The multilevel model with level 1 and 2 covariates plus interaction.
+```{r}
+mod_03 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = model_df)
+
+mod_04 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + gndctr_PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = model_df)
+
+screenreg(list(mod_03, mod_04))
+
+anova(mod_04, mod_03)
+```
+
+Now try it with the standardized variables.
+```{r}
+mod_05 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + gndctr_Police + gndctr_PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = std_df)
+
+mod_06 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + gndctr_PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = std_df)
+
+screenreg(list(mod_05, mod_06))
+
+anova(mod_06, mod_05)
+```
+Look at an interaction plot for mod_04
+```{r}
+interact_plot(mod_04, pred = gndctr_ndvi_cbg_adj, modx = clustname)
+```
+
+and with the same variables but standardized...
+```{r}
+interact_plot(mod_06, pred = gndctr_ndvi_cbg_adj, modx = clustname)
+```
+
+#### GLMM
+
+https://biol609.github.io/lectures/04_gls.html#/section  
+https://stats.idre.ucla.edu/r/dae/poisson-regression/
+
+```{r}
+mod_07 <- glmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + gndctr_PCgdp15 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = std_df, family = "poisson")
+```
+
