@@ -1,0 +1,57 @@
+---
+title: "Look at cities with positive slope"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+library(purrr)
+library(tidyr)
+library(DataExplorer)
+library(jtools) # ver1.0 on github,
+
+city <- readRDS("../data/city_all.rds")
+df <- readRDS("../data/mlm_incity_data.rds")
+
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+
+df_urban <- df %>% filter(Urban == 1)
+
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+```
+
+The final model that is being used.
+
+```{r}
+mod_v_06 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + 
+                   gndctr_PCgdp000 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_p_06 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
+                   gndctr_rt_property + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+```
+### Cities with positive slope for violent crime
+
+```{r paged.print=FALSE}
+m4_coef <- coef(mod_v_06)$city_st %>% tibble::rownames_to_column(var = "city_st")
+cpos <- m4_coef %>% filter(gndctr_ndvi_cbg_adj > 0) %>% dplyr::select(city_st, gndctr_ndvi_cbg_adj, Int = "(Intercept)") %>% arrange(desc(gndctr_ndvi_cbg_adj))
+cpos
+```
+
+```{r}
+df_pos <- df_na %>% mutate(vcpos = if_else(city_st %in% cpos$city_st, 1, 0))
+
+df_pos %>% group_by(vcpos) %>% summarise(green = mean(ndvi_mean_cbg_adj), avg_disad = mean(disad, na.rm=T), avg_inc = mean(MedHHinc_000, na.rm=T), cGDP = mean(PCgdp15, na.rm=T), avg_div = mean(divindex, na.rm=T), avg_crim = mean(CRMCYPERC)) %>% ggplot(aes(factor(vcpos), avg_crim)) + geom_point()
+
+df_pos %>% group_by(vcpos) %>% summarise_at(vars(CRMCYPERC:CRMCYMVEH, disad, divindex, ndvi_mean_cbg_adj, MedHHinc_000, PerCapitaOfficers1000:rate_total), mean, na.rm = TRUE)
+```
+
