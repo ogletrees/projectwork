@@ -1,0 +1,83 @@
+---
+title: "Final Model for article 1"
+output: html_notebook
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(multilevel)
+library(sjPlot)
+library(sjmisc)
+library(broom)
+library(merTools)
+library(stargazer)
+library(texreg)
+library(purrr)
+library(tidyr)
+library(DataExplorer)
+library(jtools) # ver1.0 on github,
+
+city <- readRDS("../data/city_all.rds")
+df <- readRDS("../data/mlm_incity_data.rds")
+
+df_na <- df %>% filter(!is.na(gndctr_MedHHinc000)& !is.na(gndctr_disad))
+
+df_urban <- df %>% filter(Urban == 1)
+
+df_urban_nona <- df_na %>% filter(Urban == 1)
+
+```
+
+The final model that is being used.
+
+```{r}
+mod_v_06 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + 
+                   gndctr_PCgdp000 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+mod_p_06 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
+                   gndctr_rt_property + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+```
+
+Tables
+```{r}
+sjt.lmer(mod_v_06, mod_p_06, p.kr = F, show.aic = T, show.icc = F, p.numeric = F, depvar.labels = c("Violent Crime Index", "Property Crime Index"), string.est = "Estimate",  string.dv = "Response", show.se = T, show.ci = F)
+```
+```{r}
+sjp.lmer(mod_v_06, type = "fe", y.offset = .4, p.kr = F)
+```
+```{r}
+u0 <- ranef(mod_v_06, postVar=T)$city_st
+str(u0)
+u0se <- attr(u0, "postVar")[1, , ]
+u0sv <- as.data.frame(ranef(mod_v_06, postVar=T))
+```
+```{r}
+u0sv %>% filter(term == "gndctr_ndvi_cbg_adj") %>% arrange(condval) %>% mutate(rank = dense_rank(desc(-condval))) %>% dplyr::glimpse() %>% 
+  ggplot(aes(rank, condval)) + geom_point() + geom_errorbar(aes(ymin=condval-(1.96*condsd), ymax=condval+(1.96*condsd))) + geom_hline(yintercept = 25.24, linetype = 2) + labs(title = "Random Effect - Slope NDVI")
+```
+```{r}
+u0sv %>% filter(term == "gndctr_ndvi_cbg_adj") %>% filter(condval > 23) %>% arrange(condval) %>% mutate(rank = dense_rank(desc(-condval))) %>% 
+  ggplot(aes(rank, condval)) + geom_point() + geom_errorbar(aes(ymin=condval-(1.96*condsd), ymax=condval+(1.96*condsd))) + geom_hline(yintercept = 25.24)
+```
+The above shows the random effect for the NDVI slope (the amount added to the estimated slope value overall) and the 95% error bars for those random estimates. THe horizontal line is where the relationship switches from negative to positive.
+```{r}
+u0sv %>% filter(term == "gndctr_ndvi_cbg_adj") %>% filter(condval > 30) %>% arrange(condval)
+```
+### Positive Violent Crime Cities
+
+```{r}
+df_pos <- df_na %>% mutate(vcpos = if_else(city_st %in% c("Detroit_MI", "Newark_NJ", "Chicago_IL"), 1, 0))
+
+df_pos %>% group_by(vcpos) %>% summarise_at(vars(CRMCYPERC:CRMCYMVEH, disad, divindex, ndvi_mean_cbg_adj, MedHHinc_000, PerCapitaOfficers1000:rate_total), mean, na.rm = TRUE)
+```
+```{r}
+df_pos %>% ggplot(aes(factor(vcpos), rate_violentcrime)) + geom_boxplot() + geom_jitter(width = 0.25)
+```
+```{r}
+df_pos %>% filter(vcpos==1) %>% group_by(city_st) %>% count()
+df_pos %>% filter(vcpos==1) %>% group_by(city_st) %>% summarise(vc_sd = sd(CRMCYPERC))
+df_pos %>% filter(vcpos==0) %>% group_by(city_st) %>% summarise(vc_sd = sd(CRMCYPERC)) %>%  arrange(vc_sd)
+```
+

@@ -34,7 +34,7 @@ df_urban_nona <- df_na %>% filter(Urban == 1)
 
 Both violent and property crime. Using the dataset with NA removed (NA from Median HH Income and some population vars) for consistency across models.
 
-```{r}
+```{r NullModel}
 mod_v_01 <- lmer(CRMCYPERC ~ 1 + (1|city_st), data = df_na)
 mod_p_01 <- lmer(CRMCYPROC ~ 1 + (1|city_st), data = df_na)
 
@@ -43,7 +43,7 @@ summary(mod_p_01)
 ```
 ### For good measure - models with NDVI and random slope
 
-```{r}
+```{r AddNDVI and slope}
 mod_v_01a <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
 mod_p_01a <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + (1|city_st), data = df_na)
 
@@ -60,7 +60,7 @@ summary(mod_p_01b)
 
 Keep random slope for NDVI as that is of interest.
 
-```{r}
+```{r Level1}
 mod_v_02 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_p_02 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 
@@ -69,7 +69,7 @@ summary(mod_p_02)
 ```
 ### Model with level 2 variables added
 
-```{r}
+```{r Level2}
 mod_v_03 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
                    gndctr_Police + gndctr_PCgdp000 + gndctr_rt_violent + clustname + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_p_03 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
@@ -80,7 +80,7 @@ summary(mod_p_03)
 ```
 ### and now for the interaction!
 
-```{r}
+```{r Interaction1}
 mod_v_04 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
                    gndctr_Police + gndctr_PCgdp000 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_p_04 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
@@ -91,25 +91,25 @@ summary(mod_p_04)
 ```
 ### side-by-side comparison
 
-```{r}
+```{r tables}
 screenreg(list(mod_v_01, mod_v_02, mod_v_03, mod_v_04))
 screenreg(list(mod_p_01, mod_p_02, mod_p_03, mod_p_04))
 ```
 ### Model Comparison
 
 Is model 2 better than model 1
-```{r}
+```{r LRT 1-2}
 anova(mod_v_01, mod_v_02)
 anova(mod_p_01, mod_p_02)
 ```
 
 Is model 3 better than model 2
-```{r}
+```{r LRT 2-3}
 anova(mod_v_02, mod_v_03)
 anova(mod_p_02, mod_p_03)
 ```
 Is mode 4 better than model 3
-```{r}
+```{r LRT 3-4}
 anova(mod_v_03, mod_v_04)
 anova(mod_p_03, mod_p_04)
 ```
@@ -117,7 +117,7 @@ anova(mod_p_03, mod_p_04)
 ### What about log transforming *Crime*
 
 Compare model 4. The $\beta$ is $(e^\beta-1)\times 100$ = percent change in Y. The intercept is just $e^\beta$
-```{r}
+```{r test log transform}
 mod_v_05 <- lmer(log(CRMCYPERC) ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
                    gndctr_Police + gndctr_PCgdp000 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_p_05 <- lmer(log(CRMCYPROC) ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
@@ -133,29 +133,32 @@ I get the interaction term from model 4 and this gives us the significance relat
 ```
 ### Interaction plots
 
-```{r}
-interact_plot(mod_v_04, pred = gndctr_ndvi_cbg_adj, modx = clustname, data = df_na, main.title = "Interaction - Violent Crime")
-interact_plot(mod_p_04, pred = gndctr_ndvi_cbg_adj, modx = clustname, data = df_na, main.title = "Interaction - Property Crime")
+```{r interaction plots}
+interact_plot(mod_v_04, pred = gndctr_ndvi_cbg_adj, modx = clustname, data = df_na, main.title = "Interaction - Violent Crime",interval = T )
+interact_plot(mod_p_04, pred = gndctr_ndvi_cbg_adj, modx = clustname, data = df_na, main.title = "Interaction - Property Crime" ) + theme_apa()
 ```
 ### Coefficient Plots
 
-```{r}
-sjp.lmer(mod_v_04, type = "fe", p.kr = FALSE, y.offset = 0.4, show.intercept = T)
+```{r fixed eff plot}
+labs1 <- c("Mean NDVI", "Climate Region- cool-wet-low", "Climate Region- warm-dry-high", "Climate Region- warm-wet-high", "Median Household Income", "Disadvantage Index", "Diversity Index", "Percent under 18", "Log Population Density", "Rate-Violent Crime", "NDVI X cool-wet-low", "NDVI X  warm-dry-high", "NDVI X warm-wet-high")
+labs2 <- c("Mean NDVI", "Climate Region- cool-wet-low", "Climate Region- warm-dry-high", "Climate Region- warm-wet-high", "Median Household Income", "Disadvantage Index", "Diversity Index", "Percent under 18", "Log Population Density", "Rate-Property Crime", "NDVI X cool-wet-low", "NDVI X  warm-dry-high", "NDVI X warm-wet-high")
+sjp.lmer(mod_v_06, type = "fe", p.kr = FALSE, y.offset = 0.4, show.intercept = T, title = "Final Model - Violent Crime", axis.labels = labs1)
+sjp.lmer(mod_p_06, type = "fe", p.kr = FALSE, y.offset = 0.4, show.intercept = T, title = "Final Model - Property Crime", axis.labels = labs2)
 
 ```
 ### Appendix
 
-```{r}
+```{r variance-covariance 4}
 VarCorr(mod_v_04)$city_st
 VarCorr(mod_p_04)$city_st
 ```
 
-```{r paged.print=FALSE}
+```{r pos, paged.print=FALSE}
 m4_coef <- coef(mod_v_04)$city_st %>% add_rownames(var = "city_st")
 m4_coef %>% filter(gndctr_ndvi_cbg_adj > 0) %>% dplyr::select(city_st, gndctr_ndvi_cbg_adj, Int = "(Intercept)") %>% arrange(desc(gndctr_ndvi_cbg_adj))
 m4_coef %>% filter(gndctr_ndvi_cbg_adj > 0) %>% dplyr::select(city_st, gndctr_ndvi_cbg_adj, Int = "(Intercept)") %>% ggplot(aes(Int, gndctr_ndvi_cbg_adj)) + geom_point()
 ```
-```{r}
+```{r diagnostics}
 sjp.lmer(mod_v_04, type = "re.qq")
 m4_coef %>% filter(gndctr_ndvi_cbg_adj < -75) %>% dplyr::select(city_st, gndctr_ndvi_cbg_adj, Int = "(Intercept)")
 hist(m4_coef$`(Intercept)`)
@@ -163,10 +166,10 @@ m4_coef %>% filter(gndctr_ndvi_cbg_adj > -75) %>% ggplot(aes(`(Intercept)`)) + g
 m4_coef  %>% ggplot(aes(gndctr_ndvi_cbg_adj)) + geom_density()
 m4_coef %>% filter(gndctr_ndvi_cbg_adj > -75) %>% ggplot(aes(gndctr_ndvi_cbg_adj)) + geom_density()
 ```
-```{r}
+```{r varying slopes plot}
 df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj, CRMCYPERC)) + geom_point(alpha = 0) + geom_abline(aes(slope=gndctr_ndvi_cbg_adj, intercept= `(Intercept)`), data = m4_coef, alpha = .2) + labs(x = "NDVI", y = "Violent Crime Index", title = "Violent Crime random slopes")
 ```
-```{r}
+```{r varying slopes prop}
 m4p_coef <- coef(mod_p_04)$city_st %>% add_rownames(var = "city_st")
 df_na %>% ggplot(aes(gndctr_ndvi_cbg_adj, CRMCYPERC)) + geom_point(alpha = 0) + geom_abline(aes(slope=gndctr_ndvi_cbg_adj, intercept= `(Intercept)`), data = m4p_coef, alpha = .2) + labs(x = "NDVI", y = "Property Crime Index", title = "Property Crime random slopes")
 sjp.lmer(mod_p_04, type = "re.qq")
@@ -175,7 +178,7 @@ m4p_coef %>% filter(gndctr_ndvi_cbg_adj > 0) %>% dplyr::select(city_st, gndctr_n
 ```
 ### Model 4 without non-significant variables
 
-```{r}
+```{r final model}
 mod_v_06 <- lmer(CRMCYPERC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_logpopden + 
                    gndctr_PCgdp000 + gndctr_rt_violent + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
 mod_p_06 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 + gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden + 
@@ -183,5 +186,118 @@ mod_p_06 <- lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj*clustname + gndctr_MedHHinc000 
 
 summary(mod_v_06)
 summary(mod_p_06)
+```
+
+### Tables out to html
+
+```{r model out table}
+screenreg(mod_p_01)
+```
+```{r}
+plabels <- c("Mean NDVI", "Median Household Income (000's)", "Disadvantge Index", "Diversity Index", "Percent under 18", "Log Population Density", "Per capita Police Force", "Per capita GDP", "Violent Crime Rate", "Climate Region-cool-wet-lo", "Climate Region-warm-dry-hi", "Climate Region-warm-wet-hi", "NDVI X cool-wet-lo", "NDVI X warm-dry-hi", "NDVI X warm-wet-hi")
+sjt.lmer(mod_v_02, mod_v_03, mod_v_06,  p.kr = F, show.aic = T, show.icc = F, p.numeric = F, depvar.labels = c("Violent Crime-Model 2","Violent Crime-Model 3","Violent CrimeModel 4"), string.est = "Estimate", string.dv = "Response", pred.labels = plabels, show.se = T, show.r2 = F, show.ci = F, file = "../figures/table_models_violent.html")
+
+
+```
+```{r}
+plabels1 <- c("Mean NDVI", "Median Household Income (000's)", "Disadvantge Index", "Diversity Index", "Percent under 18", "Log Population Density", "Per capita Police Force", "Per capita GDP", "Property Crime Rate", "Climate Region-cool-wet-lo", "Climate Region-warm-dry-hi", "Climate Region-warm-wet-hi", "NDVI X cool-wet-lo", "NDVI X warm-dry-hi", "NDVI X warm-wet-hi")
+sjt.lmer(mod_p_02, mod_p_03, mod_p_06,  p.kr = F, show.aic = T, show.icc = F, p.numeric = F, depvar.labels = c("Property Crime-Model 2","Property Crime-Model 3","Property Crime-Model 4"), string.est = "Estimate", string.dv = "Response", pred.labels = plabels1, show.se = T, show.r2 = F, show.ci = F, file = "../figures/table_models_property.html")
+```
+Fetch some R^2
+```{r}
+print("Violent crime model")
+sjstats::r2(mod_v_06)
+print("Property crime model")
+sjstats::r2(mod_p_06)
+vnull <- lmer(CRMCYPERC ~ 1 + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+pnull <- lmer(CRMCYPROC ~ 1 + (gndctr_ndvi_cbg_adj|city_st), data = df_na)
+sjstats::r2(mod_v_06, n= vnull)
+sjstats::r2(mod_p_06, n= pnull)
+```
+
+```{r r2 function, echo=FALSE}
+multilevel.effect.size<-function(lmer.model){
+  #Information of the measures can be found in LaHuis, Hartman, Hakoyama, and Clark (2014).
+  #This function will produce Multiple R squared measures for multilevel models based 
+  #on lmer models from lme4 package in R.
+  #This function should be used for research and education (and/or entertainment) purposes only.
+  #contact shotaro.hakoyama@gmail.com for bugs, suggestions, and comments. 
+  
+  require(lme4);
+  #extracting the name of the data frame from the lmer object import them to use within the function.
+  data<-lmer.model@frame
+  
+  #extracting pieces of the lmer model syntax.
+  model<-strsplit(as.character(attributes(lmer.model)$call)[2], split=" + (", fixed=T)
+  criterion<-names(data)[1]
+  group.id<-names(data)[length(names(data))]
+  #computing null model needed for R2 approx and R2 S&B
+  null<-update(lmer.model,as.formula(paste(criterion, " ~ 1 + (1 | ", group.id,")", sep="")))
+  
+  #extracting variance components and coefficients from the models. 
+  null.var<-lme4::VarCorr(null)
+  null.tau00<-attr(null.var[[group.id]],"stddev")^2
+  null.sigma<-attr(null.var,'sc')^2
+  
+  fixed.model<-update(lmer.model,as.formula(paste(model[[1]][1], " + ( 1 | ", group.id,")" ,sep="")))
+  fixed.model.fixef<-fixef(fixed.model)
+  fixed.model.var<-lme4::VarCorr(fixed.model)
+  fixed.model.tau00<-attr(fixed.model.var[[group.id]],"stddev")^2
+  fixed.model.sigma<-attr(fixed.model.var,'sc')^2
+  
+  lmer.model.fixef<-fixef(lmer.model)
+  lmer.model.var<-lme4::VarCorr(lmer.model)
+  tau<-diag(lmer.model.var[[group.id]][,])
+  lmer.model.sigma<-attr(lmer.model.var,'sc')^2
+  
+  slope.var<-NULL
+  for ( zz in 2:length(tau)){
+  slope.var<-append(slope.var, tau[zz]*var(data[names(tau)[zz]]))
+  }
+  
+  if(is.na(tau["(Intercept)"])){
+    tau.int<-fixed.model.tau00 }else {
+    tau.int<-tau["(Intercept)"]
+     }
+    
+  tau.sigma = tau.int+lmer.model.sigma+sum(slope.var)
+  
+  
+  r2.approx.level1<-(null.sigma-fixed.model.sigma)/null.sigma
+  r2.approx.level2<-(null.tau00-fixed.model.tau00)/null.tau00
+  r2.s.b<-1-(tau.sigma)/(null.sigma+null.tau00)
+  r2.ols<-summary(lm(as.formula(model[[1]][1]), data=data))$r.squared
+  
+  predicted.y<-predict(lmer.model, re.form=NA)
+  r2.mvp<-var(predicted.y)/(var(predicted.y)+tau.sigma)
+  
+  R.squared<-data.frame(r2.approx.level1, r2.approx.level2, r2.s.b, r2.ols,r2.mvp )
+  names(R.squared)<-c("R^2 Approx Level1", "R^2 Approx Level2", "R^2 Snijders & Bosker", "R^2 OLS","R^2 MVP")
+  rownames(R.squared)<-NULL
+
+  return(R.squared)
+}
+```
+
+```{r}
+multilevel.effect.size(mod_v_03)
+```
+
+```{r}
+screenreg(list(vnull, mod_v_02, mod_v_03, mod_v_06))
+screenreg(list(pnull, mod_p_02, mod_p_03, mod_p_06))
+```
+```{r}
+(lmer(CRMCYPROC ~ gndctr_ndvi_cbg_adj * clustname + gndctr_MedHHinc000 +      gndctr_disad + gndctr_diver + gndctr_U18 + gndctr_logpopden +  
+    gndctr_rt_property + (1 | city_st), data = df_na))
+```
+```{r}
+anova(mod_p_04, mod_p_06)
+```
+
+### Descriptive Stats
+```{r}
+dstat <- df_na %>% select_if(is.numeric) %>% psych::describe()
+dstat %>% dplyr::select(mean, sd, min, max)
 ```
 
